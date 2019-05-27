@@ -1,0 +1,5 @@
+speedtest-cli
+Flask==1.0.3
+Flask-SQLAlchemy==2.4.0
+PyMySQL==0.9.3
+python-dotenv==0.10.2
