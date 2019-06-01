@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div id="chart_container">
+
+</div>
+
+<script>
+    var charts = JSON.parse('{{ charts | tojson | safe }}');
+    var container = document.getElementById('chart_container');
+    renderCharts(charts, container);
+</script>
+
+{% endblock content %}

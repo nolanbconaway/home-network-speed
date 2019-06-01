@@ -1,5 +1,7 @@
-#! /usr/bin/env python
+"""Database model for snpashots.
 
+___main__ will actually make the snapshot happen and persist it.
+"""
 import datetime
 import speedtest
 
