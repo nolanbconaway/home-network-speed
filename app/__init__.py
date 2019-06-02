@@ -113,6 +113,7 @@ def hourly():
 
 
 @app.route("/")
+@mysql_limit
 def about():
     """Show the about page."""
     sql = """
