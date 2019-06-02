@@ -10,6 +10,8 @@ import pytz
 # flask imports
 from flask import Flask
 from flask import render_template
+from flask import redirect
+from flask import url_for
 
 # flask extensions
 from flask_sqlalchemy import SQLAlchemy
@@ -109,3 +111,19 @@ def hourly():
     charts.append(plotting.hour_distributions(df, "Upload (mbits)"))
     return render_template("display_charts.html", charts=charts)
 
+
+@app.route("/")
+def about():
+    """Show the about page."""
+    sql = """
+    select
+    convert_tz(dttm_utc, 'UTC', 'US/Eastern') as dttm_nyc,
+    ping_ms                                   as 'Ping (ms)',
+    download_mbits                            as 'Download (mbits)',
+    upload_mbits                              as 'Upload (mbits)'
+    from snapshots
+    order by dttm_utc desc
+    limit 1
+    """
+    record = db.session.execute(sql).first()
+    return render_template("about.html", last_snapshot=record)

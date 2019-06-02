@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div id=about>
+    <h2>Current Network Performance</h2>
+    <dl class="row">
+        <dt class="col-sm-2">As of</dt>
+        <dd class="col-sm-9">{{last_snapshot.dttm_nyc.strftime("%B %-d %Y, %-I:%M %p")}} (nyc time)</dd>
+
+        <dt class="col-sm-2">Ping</dt>
+        <dd class="col-sm-9">{{last_snapshot['Ping (ms)']}} ms</dd>
+
+        <dt class="col-sm-2">Download</dt>
+        <dd class="col-sm-9">{{last_snapshot['Download (mbits)'] | round(2)}} mbit/s</dd>
+
+        <dt class="col-sm-2">Upload</dt>
+        <dd class="col-sm-9">{{last_snapshot['Upload (mbits)'] | round(2)}} mbit/s</dd>
+    </dl>
+
+
+    <h3>About</h3>
+
+    <p>
+        I use a <a href="https://github.com/sivel/speedtest-cli">speedtest.net Python API</a> to capture metrics on my
+        network performance throughout the day and store them in my personal MySQL database. This app provides
+        visualizations of those metrics.
+    </p>
+
+    <p>
+        The speed tests are run on a Raspberry Pi which is involved in several other jobs that I have running at
+        home. The machine is connected via ethernet through a <a href="https://www.amazon.com/dp/B01N7YQO9G">powerline
+            adapter</a>, like so:
+    </p>
+
+    <pre>
+| ------ |     | --------- |     | -------- |     | ----- |
+| Router | <-> | Powerline | <-> | Ethernet | <-> | Raspi |
+|        | <-> | Adapter   | <-> | Switch   | <-> |       |
+| ------ |     | --------- |     | -------- |     | ----- |
+</pre>
+
+    <p>
+        That set up might diminish performance a little compared to a direct ethernet connection, but it should be
+        faster than wifi. Besides, thats also how I hook up my personal computer so this should accurately reflect my
+        network experience.
+    </p>
+</div>
+
+
+<style>
+    #about {
+        padding-left: 1em;
+        padding-top: 1em
+    }
+</style>
+{% endblock content %}

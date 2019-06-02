@@ -1,17 +1,7 @@
 """Functions to create plots given data."""
 import datetime
 import pandas as pd
-from palettable.cartocolors.qualitative import Safe_7
-
-weekday_names = {
-    0: "Monday",
-    1: "Tuesday",
-    2: "Wednesday",
-    3: "Thursday",
-    4: "Friday",
-    5: "Saturday",
-    6: "Sunday",
-}
+from palettable.cartocolors.qualitative import Safe_2
 
 
 def _hour_to_time(num: int):
@@ -57,34 +47,38 @@ def timeseries(
 def hour_distributions(
     df: pd.DataFrame, var: str, dataset_kws: dict = dict(), options_kws: dict = dict()
 ) -> dict:
-
+    """Make radar charts showing hourly averages."""
     avgs = (
-        df.assign(dow=lambda x: x.dttm_nyc.dt.weekday, hod=lambda x: x.dttm_nyc.dt.hour)
-        .groupby(["dow", "hod"])[var]
+        df.assign(
+            is_weekday=lambda x: x.dttm_nyc.dt.weekday < 4,
+            hod=lambda x: x.dttm_nyc.dt.hour,
+        )
+        .groupby(["is_weekday", "hod"])[var]
         .mean()
         .reset_index()
-        .sort_values(["dow", "hod"])
+        .sort_values(["is_weekday", "hod"])
     )
 
     # make datasets
     _dataset_kws = {}
     _dataset_kws.update(dataset_kws)
     datasets = []
-    for dow, weekday_name in weekday_names.items():
-        rows = avgs.loc[lambda x: x.dow == dow]
-        print(_rgb_to_string(Safe_7.colors[dow], alpha=255 / 7))
+    for is_weekday in (True, False):
+        rows = avgs.loc[lambda x: x.is_weekday == is_weekday]
         datasets.append(
             {
-                "label": weekday_name,
+                "label": "Weekday" if is_weekday else "Weekend",
                 "data": rows[var].tolist(),
-                "backgroundColor": _rgb_to_string(Safe_7.colors[dow], alpha=1 / 4),
+                "backgroundColor": _rgb_to_string(
+                    Safe_2.colors[is_weekday], alpha=1 / 2
+                ),
                 "pointRadius": 0,
                 **_dataset_kws,
             }
         )
 
     # make options
-    options = {"responsive": True, "title": {"display": True, "text": var}}
+    options = {"responsive": False, "title": {"display": True, "text": var}}
     options.update(options_kws)
 
     return {
