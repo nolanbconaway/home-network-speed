@@ -1,6 +1,7 @@
 """Main flask app."""
 
 import os
+import datetime
 
 import pandas as pd
 import dotenv
@@ -12,6 +13,8 @@ from flask import render_template
 
 # flask extensions
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # library imports
 from . import plotting
@@ -27,6 +30,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+limiter = Limiter(app, key_func=get_remote_address)
+mysql_limit = limiter.shared_limit(
+    ["60 per hour", "120 per day"],
+    scope="mysql",
+    exempt_when=lambda: get_remote_address().startswith("127.0.0.1"),
+)
 
 
 @app.route("/health")
@@ -35,28 +44,68 @@ def health():
     return "ok"
 
 
-@app.route("/")
-def mainpage():
+@app.route("/today")
+@mysql_limit
+def today():
     """Render the main page."""
     # sql query
     sql = """
     select 
       convert_tz(dttm_utc, 'UTC', 'US/Eastern') as dttm_nyc
-    , ping_ms
-    , download_mbits
-    , upload_mbits
+    , ping_ms as 'Ping (ms)'
+    , download_mbits as 'Download (mbits)'
+    , upload_mbits as 'Upload (mbits)'
     from snapshots
-    where dttm_utc >= (curdate() + interval -90 day)
+    where dttm_utc >= (UTC_TIMESTAMP() + interval -1440 minute)
     order by 1 desc
     """
 
-    # grab the dataframe and localize the datetime to nyc
-    df = pd.read_sql_query(sql, db.engine).assign(
-        dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
+    df = (
+        pd.read_sql_query(sql, db.engine)
+        # make datetime tz aware
+        .assign(
+            dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
+        )
+        # make a formatted version for ease of use with chart js
+        .assign(date_formatted=lambda x: x.dttm_nyc.dt.strftime("%Y-%m-%d %H:%M:%S"))
     )
 
     charts = []
-    charts.append(plotting.timeseries(df, "ping_ms"))
-    charts.append(plotting.timeseries(df, "download_mbits"))
-    charts.append(plotting.timeseries(df, "upload_mbits"))
-    return render_template("main.html", charts=charts)
+    charts.append(plotting.timeseries(df, "Ping (ms)"))
+    charts.append(plotting.timeseries(df, "Download (mbits)"))
+    charts.append(plotting.timeseries(df, "Upload (mbits)"))
+    return render_template("display_charts.html", charts=charts)
+
+
+@app.route("/hourly")
+@mysql_limit
+def hourly():
+    """Render the main page."""
+    # sql query
+    sql = """
+    select 
+      convert_tz(dttm_utc, 'UTC', 'US/Eastern') as dttm_nyc
+    , ping_ms as 'Ping (ms)'
+    , download_mbits as 'Download (mbits)'
+    , upload_mbits as 'Upload (mbits)'
+    from snapshots
+    where dttm_utc >= (UTC_TIMESTAMP() + interval -30 day)
+    order by 1 desc
+    """
+
+    df = (
+        pd.read_sql_query(sql, db.engine)
+        # make datetime tz aware
+        .assign(
+            dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
+        )
+        # make a formatted version for ease of use with chart js
+        .assign(date_formatted=lambda x: x.dttm_nyc.dt.strftime("%Y-%m-%d %H:%M:%S"))
+    )
+
+    charts = []
+    charts.append(plotting.hour_distributions(df, "Ping (ms)"))
+    charts.append(plotting.hour_distributions(df, "Download (mbits)"))
+    charts.append(plotting.hour_distributions(df, "Upload (mbits)"))
+    return render_template("display_charts.html", charts=charts)
+

@@ -34,15 +34,32 @@
 <body>
   <section class="content">
 
-    <header>
-      {% block header %}{% endblock %}
-    </header>
     {% for message in get_flashed_messages() %}
     <div class="flash">{{ message }}</div>
     {% endfor %}
 
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand">Nolan's Network Speed</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    {% block content %}{% endblock %}
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('today')}}">Today's Performance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('hourly')}}">Hourly Averages</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    {% block content %}
+    <h1>About</h1>
+    {% endblock %}
   </section>
 </body>
 
