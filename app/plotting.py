@@ -96,4 +96,3 @@ def hour_distributions(
         "data": {"labels": list(map(_hour_to_time, range(24))), "datasets": datasets},
         "options": options,
     }
-
