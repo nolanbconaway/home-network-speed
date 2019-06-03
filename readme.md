@@ -1,7 +1,9 @@
-# server-network-speed
+# home-network-speed
 
-A cron job and flask app to keep track of my remote server's network speeds.
+![my badge](https://action-badges.now.sh/nolanbconaway/home-network-speed)
 
-The cron job runs on the server and stores the results of a speed test in a database.
+This is a python application which keeps track of my home network performance.
 
-The flask app reads the database and shows me the speeds over time.
+There is a cron job which runs on a raspberry pi throughout the day, which stores the results of a speed test in a database.
+
+There is also a flask app reads the database and shows me the speeds over time.
