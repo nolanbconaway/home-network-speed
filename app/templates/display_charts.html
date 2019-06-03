@@ -10,6 +10,9 @@
 <script>
     var charts = JSON.parse('{{ charts | tojson | safe }}');
     var container = document.getElementById('chart_container');
+
+    // TODO: add some parameter passing between jinja and here
+    // so that we can have square-er radar plots
     renderCharts(charts, container);
 </script>
 
