@@ -3,7 +3,7 @@
  * @param {int} width - The width of the canvas.
  * @param {int} height - The height of the canvas.
  */
-function canvas(width = 600, height = 250) {
+function canvas(width = 900, height = 350) {
     var canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
