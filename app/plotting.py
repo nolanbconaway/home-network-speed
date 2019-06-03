@@ -35,7 +35,10 @@ def timeseries(
     # get options
     options = {
         "responsive": True,
-        "scales": {"xAxes": [{"type": "time", "tooltipFormat": "LT"}]},
+        "scales": {
+            "xAxes": [{"type": "time", "tooltipFormat": "LT"}],
+            "yAxes": [{"type": "linear", "ticks": {"min": 0}}],
+        },
         "legend": {"display": False},
         "title": {"display": True, "text": var},
     }
@@ -78,7 +81,11 @@ def hour_distributions(
         )
 
     # make options
-    options = {"responsive": False, "title": {"display": True, "text": var}}
+    options = {
+        "responsive": False,
+        "title": {"display": True, "text": var},
+        "scale": {"ticks": {"beginAtZero": True}},
+    }
     options.update(options_kws)
 
     return {
