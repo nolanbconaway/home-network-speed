@@ -36,7 +36,7 @@ limiter = Limiter(app, key_func=get_remote_address)
 mysql_limit = limiter.shared_limit(
     ["60 per hour", "120 per day"],
     scope="mysql",
-    exempt_when=lambda: get_remote_address().startswith("127.0.0.1"),
+    # exempt_when=lambda: get_remote_address().startswith("127.0.0.1"),
 )
 
 
