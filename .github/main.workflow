@@ -1,18 +1,28 @@
+name: Main Workflow
 
-workflow "Build, Lint" {
-  on = "push"
-  resolves = [
-    "Format",
-  ]
-}
+on: push
 
-action "Build" {
-  uses = "nolanbconaway/python-actions@master"
-  args = "pip install black pylint && pip install -r requirements.txt"
-}
+jobs:
+  build:
+    name: Main Workflow
 
-action "Format" {
-  uses = "nolanbconaway/python-actions@master"
-  args = "black app/* --check --verbose"
-  needs = ["Build"]
-}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: 3.7
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install black
+
+      - name: Lint with Black
+        run: black app --check --verbose
