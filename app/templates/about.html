@@ -30,21 +30,20 @@
 
     <p>
         The speed tests are run on a Raspberry Pi which is involved in several other jobs that I have running at
-        home. The machine is connected via ethernet through a <a href="https://www.amazon.com/dp/B01N7YQO9G">powerline
-            adapter</a>, like so:
+        home. The machine is connected via ethernet to my network like so:
     </p>
 
     <pre>
 | ------ |     | --------- |     | -------- |     | ----- |
-| Router | <-> | Powerline | <-> | Ethernet | <-> | Raspi |
-|        | <-> | Adapter   | <-> | Switch   | <-> |       |
+| Router | <-> | Very Long | <-> | Ethernet | <-> | Raspi |
+|        | <-> | Cable     | <-> | Switch   | <-> |       |
 | ------ |     | --------- |     | -------- |     | ----- |
 </pre>
 
     <p>
-        That set up might diminish performance a little compared to a direct ethernet connection, but it should be
-        faster than wifi. Besides, thats also how I hook up my personal computer so this should accurately reflect my
-        network experience.
+        That setup might diminish performance due to the <i>very long</i> ethernet cable, but it should be
+        faster than wifi. Besides, my personal computer is hooked up form the same switch so this should
+        accurately reflect my network experience.
     </p>
 </div>
 
@@ -54,5 +53,6 @@
         padding-left: 1em;
         padding-top: 1em
     }
+
 </style>
 {% endblock content %}
