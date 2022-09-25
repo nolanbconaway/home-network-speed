@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install black
+          pip install black==22.8.0
 
       - name: Lint with Black
         run: black app --check --verbose
