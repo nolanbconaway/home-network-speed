@@ -122,3 +122,9 @@ def about():
     with engine.connect() as conn:
         record = dict(zip(keys, conn.execute(sql).fetchone()))
     return render_template("about.html", last_snapshot=record)
+
+
+@app.route("/health")
+def health():
+    """Health check."""
+    return "ok"
