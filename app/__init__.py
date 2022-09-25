@@ -1,22 +1,19 @@
 """Main flask app."""
 
-import os
 import datetime
+import os
 
-import pandas as pd
 import dotenv
+import pandas as pd
 import pytz
 
 # flask imports
-from flask import Flask
-from flask import render_template
-from flask import redirect
-from flask import url_for
+from flask import Flask, render_template
 
 # flask extensions
-from flask_sqlalchemy import SQLAlchemy
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from sqlalchemy import create_engine
 
 # library imports
 from . import plotting
@@ -28,16 +25,10 @@ elif os.path.exists("../.env"):
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+engine = create_engine(os.getenv("SQLALCHEMY_DATABASE_URI"))
 
-db = SQLAlchemy(app)
 limiter = Limiter(app, key_func=get_remote_address)
-mysql_limit = limiter.shared_limit(
-    ["60 per hour", "120 per day"],
-    scope="mysql",
-    # exempt_when=lambda: get_remote_address().startswith("127.0.0.1"),
-)
+mysql_limit = limiter.shared_limit(["60 per hour", "120 per day"], scope="mysql")
 
 
 @app.route("/health")
@@ -63,7 +54,7 @@ def today():
     """
 
     df = (
-        pd.read_sql_query(sql, db.engine)
+        pd.read_sql_query(sql, engine)
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -96,7 +87,7 @@ def hourly():
     """
 
     df = (
-        pd.read_sql_query(sql, db.engine)
+        pd.read_sql_query(sql, engine)
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -126,5 +117,8 @@ def about():
     order by dttm_utc desc
     limit 1
     """
-    record = db.session.execute(sql).first()
+
+    keys = ("dttm_nyc", "Ping (ms)", "Download (mbits)", "Upload (mbits)")
+    with engine.connect() as conn:
+        record = dict(zip(keys, conn.execute(sql).fetchone()))
     return render_template("about.html", last_snapshot=record)

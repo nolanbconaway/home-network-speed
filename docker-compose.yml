@@ -1,0 +1,11 @@
+services:
+  web:
+    environment:
+      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"

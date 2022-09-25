@@ -7,7 +7,7 @@
     <h2>Current Network Performance</h2>
     <dl class="row">
         <dt class="col-sm-2">As of</dt>
-        <dd class="col-sm-9">{{last_snapshot.dttm_nyc.strftime("%B %-d %Y, %-I:%M %p")}} (nyc time)</dd>
+        <dd class="col-sm-9">{{last_snapshot['dttm_nyc'].strftime("%B %-d %Y, %-I:%M %p")}} (nyc time)</dd>
 
         <dt class="col-sm-2">Ping</dt>
         <dd class="col-sm-9">{{last_snapshot['Ping (ms)']}} ms</dd>
