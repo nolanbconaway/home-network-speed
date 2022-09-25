@@ -122,4 +122,3 @@ def about():
     with engine.connect() as conn:
         record = dict(zip(keys, conn.execute(sql).fetchone()))
     return render_template("about.html", last_snapshot=record)
-
