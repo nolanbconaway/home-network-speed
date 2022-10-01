@@ -1,6 +1,4 @@
 """Main flask app."""
-
-import datetime
 import os
 
 import dotenv
@@ -13,7 +11,7 @@ from flask import Flask, render_template
 # flask extensions
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from sqlalchemy import create_engine
+from flask_sqlalchemy import SQLAlchemy
 
 # library imports
 from . import plotting
@@ -25,9 +23,11 @@ elif os.path.exists("../.env"):
 
 
 app = Flask(__name__)
-engine = create_engine(os.getenv("SQLALCHEMY_DATABASE_URI"))
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["SQLALCHEMY_DATABASE_URI"]
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-limiter = Limiter(app, key_func=get_remote_address)
+db = SQLAlchemy(app=app)
+limiter = Limiter(app, key_func=get_remote_address, storage_uri="memory://")
 mysql_limit = limiter.shared_limit(["60 per hour", "120 per day"], scope="mysql")
 
 
@@ -54,7 +54,7 @@ def today():
     """
 
     df = (
-        pd.read_sql_query(sql, engine)
+        pd.read_sql_query(sql, db.session.connection())
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -87,7 +87,7 @@ def hourly():
     """
 
     df = (
-        pd.read_sql_query(sql, engine)
+        pd.read_sql_query(sql, db.session.connection())
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -119,6 +119,5 @@ def about():
     """
 
     keys = ("dttm_nyc", "Ping (ms)", "Download (mbits)", "Upload (mbits)")
-    with engine.connect() as conn:
-        record = dict(zip(keys, conn.execute(sql).fetchone()))
+    record = dict(zip(keys, db.session.execute(sql).fetchone()))
     return render_template("about.html", last_snapshot=record)
