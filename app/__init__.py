@@ -12,6 +12,7 @@ from flask import Flask, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 # library imports
 from . import plotting
@@ -54,7 +55,7 @@ def today():
     """
 
     df = (
-        pd.read_sql_query(sql, db.session.connection())
+        pd.read_sql_query(text(sql), db.session.connection())
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -87,7 +88,7 @@ def hourly():
     """
 
     df = (
-        pd.read_sql_query(sql, db.session.connection())
+        pd.read_sql_query(text(sql), db.session.connection())
         # make datetime tz aware
         .assign(
             dttm_nyc=lambda df: df.dttm_nyc.apply(pytz.timezone("US/Eastern").localize)
@@ -119,5 +120,5 @@ def about():
     """
 
     keys = ("dttm_nyc", "Ping (ms)", "Download (mbits)", "Upload (mbits)")
-    record = dict(zip(keys, db.session.execute(sql).fetchone()))
+    record = dict(zip(keys, db.session.execute(text(sql)).fetchone()))
     return render_template("about.html", last_snapshot=record)
